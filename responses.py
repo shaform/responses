@@ -123,6 +123,7 @@ class RequestsMock(object):
         self._calls = CallList()
         self.reset()
         self.assert_all_requests_are_fired = assert_all_requests_are_fired
+        self._is_enabled = False
 
     def reset(self):
         self._urls = []
@@ -298,13 +299,18 @@ class RequestsMock(object):
         self._patcher = mock.patch('requests.adapters.HTTPAdapter.send',
                                    unbound_on_send)
         self._patcher.start()
+        self._is_enabled = True
 
     def stop(self, allow_assert=True):
         self._patcher.stop()
+        self._is_enabled = False
         if allow_assert and self.assert_all_requests_are_fired and self._urls:
             raise AssertionError(
                 'Not all requests have been executed {0!r}'.format(
                     [(url['method'], url['url']) for url in self._urls]))
+
+    def is_enabled(self):
+        return self._is_enabled
 
 
 # expose default mock namespace
